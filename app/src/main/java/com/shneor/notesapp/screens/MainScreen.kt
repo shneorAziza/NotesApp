@@ -34,7 +34,7 @@ fun MainScreen(
 
     val authRepository = AuthRepository(FirebaseAuth.getInstance())
     val notesRepository = NotesRepository(
-        noteDao = Room.databaseBuilder(
+        notesDao = Room.databaseBuilder(
             context,
             AppDatabase::class.java, "notes-db"
         ).build().noteDao()

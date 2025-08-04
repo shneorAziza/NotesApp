@@ -10,8 +10,8 @@ data class Note(
     val id: String = UUID.randomUUID().toString(),
     val title: String,
     val content: String,
-    val latitude: Double?,
-    val longitude: Double?,
+    val latitude: Double? = null,
+    val longitude: Double? = null,
     val timestamp: Long = System.currentTimeMillis(),
     val imageUrl: String? = null
 )
