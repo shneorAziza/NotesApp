@@ -23,7 +23,9 @@ import com.shneor.notesapp.screens.AuthScreen
 import com.shneor.notesapp.screens.MainScreen
 import com.shneor.notesapp.screens.NoteScreen
 import com.shneor.notesapp.viewmodel.AuthViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

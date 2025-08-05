@@ -9,6 +9,8 @@ hiltNavigationCompose = "1.2.0"
 
 composeBom = "2024.06.00"
 composeCompiler = "1.5.11"
+mapsComposeVersion = "3.2.1"
+playServicesLocationVersion = "21.3.0"
 ui = "1.6.8"
 coreKtx = "1.13.1"
 lifecycleRuntimeKtx = "2.8.6"
@@ -50,6 +52,8 @@ firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.r
 firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx" }
 
 maps-compose = { group = "com.google.maps.android", name = "maps-compose", version.ref = "mapsCompose" }
+maps-compose-v321 = { module = "com.google.maps.android:maps-compose", version.ref = "mapsComposeVersion" }
+play-services-location-v2130 = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocationVersion" }
 play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 

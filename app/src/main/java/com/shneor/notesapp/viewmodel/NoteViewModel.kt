@@ -11,8 +11,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-import java.util.Date
-
 @HiltViewModel
 class NoteViewModel @Inject constructor(
     private val notesRepository: NotesRepository
@@ -26,7 +24,7 @@ class NoteViewModel @Inject constructor(
 
     private var currentNoteId: String? = null
 
-    fun loadNote(noteId: Int) {
+    fun loadNote(noteId: String) {
         viewModelScope.launch {
             val note = notesRepository.getNoteById(noteId)
             if (note != null) {
@@ -37,13 +35,15 @@ class NoteViewModel @Inject constructor(
         }
     }
 
-    fun saveNote(title: String, content: String) {
+    fun saveNote(title: String, content: String, latitude: Double, longitude: Double) {
         viewModelScope.launch {
             if (currentNoteId == null) {
                 // New note
                 val newNote = Note(
                     title = title,
-                    content = content
+                    content = content,
+                    latitude = latitude,
+                    longitude = longitude
                 )
                 notesRepository.insertNote(newNote)
             } else {
@@ -51,7 +51,9 @@ class NoteViewModel @Inject constructor(
                 val updatedNote = Note(
                     id = currentNoteId!!,
                     title = title,
-                    content = content
+                    content = content,
+                    latitude = latitude,
+                    longitude = longitude
                 )
                 notesRepository.updateNote(updatedNote)
             }

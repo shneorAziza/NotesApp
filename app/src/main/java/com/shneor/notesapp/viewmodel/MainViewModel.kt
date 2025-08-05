@@ -12,8 +12,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class MainViewModel(
+
+@HiltViewModel
+class MainViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val notesRepository: NotesRepository
 ) : ViewModel() {
@@ -45,19 +49,6 @@ class MainViewModel(
 
     fun logout() {
         authRepository.logout()
-    }
-}
-
-class MainViewModelFactory(
-    private val authRepository: AuthRepository,
-    private val notesRepository: NotesRepository
-) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-        if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return MainViewModel(authRepository, notesRepository) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
 
