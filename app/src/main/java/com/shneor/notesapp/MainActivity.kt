@@ -19,6 +19,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.google.firebase.firestore.FirebaseFirestore
 import com.shneor.notesapp.screens.AuthScreen
 import com.shneor.notesapp.screens.MainScreen
 import com.shneor.notesapp.screens.NoteScreen
@@ -44,12 +45,12 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-
 @Composable
 fun Navigation() {
     val navController = rememberNavController()
     val auth = FirebaseAuth.getInstance()
-    val authRepository = AuthRepository(auth)
+    val firestore = FirebaseFirestore.getInstance()
+    val authRepository = AuthRepository(auth, firestore)
 
     val startDestination = if (authRepository.getCurrentUser() != null) "main" else "auth"
 

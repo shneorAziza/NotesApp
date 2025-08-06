@@ -13,7 +13,7 @@ import javax.inject.Singleton
 import com.google.firebase.auth.FirebaseAuth
 import com.shneor.notesapp.repository.AuthRepository
 import com.shneor.notesapp.repository.NotesRepository
-
+import com.google.firebase.firestore.FirebaseFirestore
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -43,8 +43,17 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideAuthRepository(firebaseAuth: FirebaseAuth): AuthRepository {
-        return AuthRepository(firebaseAuth)
+    fun provideAuthRepository(
+        firebaseAuth: FirebaseAuth,
+        firestore: FirebaseFirestore
+    ): AuthRepository {
+        return AuthRepository(firebaseAuth, firestore)
+    }
+
+    @Provides
+    @Singleton
+    fun provideFirestore(): FirebaseFirestore {
+        return FirebaseFirestore.getInstance()
     }
 
     @Provides

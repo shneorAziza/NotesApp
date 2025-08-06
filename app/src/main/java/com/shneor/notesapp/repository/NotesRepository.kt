@@ -12,7 +12,7 @@ class NotesRepository @Inject constructor(
 ) {
     fun getAllNotes(): Flow<List<Note>> = notesDao.getAllNotes()
 
-    suspend fun getNoteById(noteId: String): Note? = notesDao.getNoteById(noteId.toString())
+    suspend fun getNoteById(noteId: String): Note? = notesDao.getNoteById(noteId)
 
     suspend fun insertNote(note: Note) = notesDao.insertNote(note)
 

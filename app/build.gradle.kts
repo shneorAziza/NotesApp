@@ -10,6 +10,15 @@ android {
     namespace = "com.shneor.notesapp"
     compileSdk = 35
 
+    signingConfigs {
+        getByName("debug") {
+            storeFile = file("../keystore/debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     defaultConfig {
         applicationId = "com.shneor.notesapp"
         minSdk = 24
@@ -24,8 +33,14 @@ android {
     }
 
     buildTypes {
-        release {
+
+        getByName("debug") {
+            signingConfig = signingConfigs.getByName("debug")
+        }
+
+        getByName("release") {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("debug")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -83,4 +98,5 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.play.services.location.v2130)
+    implementation(libs.firebase.firestore.ktx)
 }

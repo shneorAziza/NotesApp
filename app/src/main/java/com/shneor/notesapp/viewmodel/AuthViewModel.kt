@@ -3,6 +3,7 @@ package com.shneor.notesapp.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import com.shneor.notesapp.model.User
 import com.shneor.notesapp.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,10 +20,19 @@ class AuthViewModel @Inject constructor(private val repository: AuthRepository) 
     private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Initial)
     val uiState: StateFlow<AuthUiState> = _uiState
 
+    private val _appUser = MutableStateFlow<User?>(null)
+    val appUser: StateFlow<User?> = _appUser
+
     init {
         FirebaseAuth.getInstance().addAuthStateListener {
             _user.value = it.currentUser
             _uiState.value = AuthUiState.Initial
+
+            if (it.currentUser != null) {
+                loadAppUser()
+            } else {
+                _appUser.value = null
+            }
         }
     }
 
@@ -31,22 +41,36 @@ class AuthViewModel @Inject constructor(private val repository: AuthRepository) 
             _uiState.value = AuthUiState.Loading
             try {
                 repository.login(email, password)
+                loadAppUser()
             } catch (e: Exception) {
                 _uiState.value = AuthUiState.Error(e.message ?: "Login failed")
             }
         }
     }
 
-    fun signup(email: String, password: String) {
+    fun signup(email: String, password: String, name: String) {
         viewModelScope.launch {
             _uiState.value = AuthUiState.Loading
             try {
-                repository.signUp(email, password)
+                repository.signUp(email, password, name)
+                loadAppUser()
             } catch (e: Exception) {
                 _uiState.value = AuthUiState.Error(e.message ?: "Signup failed")
             }
         }
     }
+
+    private fun loadAppUser() {
+        viewModelScope.launch {
+            try {
+                val userData = repository.getUserData()
+                _appUser.value = userData
+            } catch (e: Exception) {
+                _uiState.value = AuthUiState.Error("Failed to load user data")
+            }
+        }
+    }
+
 
     fun resetUiState() {
         _uiState.value = AuthUiState.Initial

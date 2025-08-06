@@ -1,6 +1,8 @@
 package com.shneor.notesapp.screens
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.location.LocationManager
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -20,11 +22,15 @@ import com.shneor.notesapp.viewmodel.MainUiState
 import com.shneor.notesapp.viewmodel.MainViewModel
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import com.shneor.notesapp.R
 import com.shneor.notesapp.ui.theme.CustomBackGround
+import com.shneor.notesapp.viewmodel.AuthViewModel
+import com.shneor.notesapp.viewmodel.LocationEvent
 
 enum class DisplayMode {
     LIST,
@@ -44,40 +50,55 @@ fun MainScreen(
 
     val viewModel: MainViewModel = hiltViewModel()
 
+    val authViewModel: AuthViewModel = hiltViewModel()
+
     var displayMode by remember { mutableStateOf(DisplayMode.LIST) }
 
     val uiState by viewModel.uiState.collectAsState()
 
     val notes by viewModel.notes.collectAsState()
 
-    val currentLocation by remember { mutableStateOf<LatLng?>(null) }
+    val appUser by authViewModel.appUser.collectAsState()
+
+    val currentLocation = remember { mutableStateOf<LatLng?>(null) }
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (isGranted) {
-            val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-            fusedLocationClient.lastLocation
-                .addOnSuccessListener { location ->
-                    if (location != null) {
-                        val latitude = location.latitude
-                        val longitude = location.longitude
-                        Toast.makeText(context, "Location saved: $latitude, $longitude", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(context, "Location not available", Toast.LENGTH_SHORT).show()
-                    }
-                }
-                .addOnFailureListener {
-                    Toast.makeText(context, "Error getting location", Toast.LENGTH_SHORT).show()
-                }
+            viewModel.handleLocationRequest(context)
         } else {
-            Toast.makeText(context, "Location permission denied", Toast.LENGTH_SHORT).show()
+            viewModel.emitLocationPermissionDenied()
         }
     }
 
     LaunchedEffect(Unit) {
         locationPermissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
     }
+
+    LaunchedEffect(Unit) {
+        viewModel.locationEvent.collect { event ->
+            when (event) {
+                is LocationEvent.LocationSaved -> {
+                    Toast.makeText(context, "Location saved: ${event.lat}, ${event.lng}", Toast.LENGTH_SHORT).show()
+                    currentLocation.value = LatLng(event.lat, event.lng)
+                }
+                LocationEvent.LocationUnavailable -> {
+                    Toast.makeText(context, "Location not available", Toast.LENGTH_SHORT).show()
+                }
+                LocationEvent.LocationPermissionDenied -> {
+                    Toast.makeText(context, "Location permission denied", Toast.LENGTH_SHORT).show()
+                }
+                LocationEvent.LocationDisabled -> {
+                    Toast.makeText(context, "Location or Internet services are turned off. Please turn them on.", Toast.LENGTH_LONG).show()
+                }
+                LocationEvent.LocationError -> {
+                    Toast.makeText(context, "Error getting location", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
     Box(
         Modifier
             .fillMaxSize()
@@ -86,8 +107,8 @@ fun MainScreen(
         Scaffold(
             floatingActionButton = {
                 FloatingActionButton(onClick = {
-                    val lat = currentLocation?.latitude ?: 0.0
-                    val lng = currentLocation?.longitude ?: 0.0
+                    val lat = currentLocation.value?.latitude ?: 0.0
+                    val lng = currentLocation.value?.longitude ?: 0.0
                     navController.navigate("note_screen/null?latitude=$lat&longitude=$lng")
                 }) {
                     Icon(Icons.Default.Add, contentDescription = "Add Note")
@@ -104,14 +125,15 @@ fun MainScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp)
-                        .padding(top = 50.dp),
+                        .padding(top = 20.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.Top
                 ) {
                     Text(
                         text = "My Notes",
                         style = MaterialTheme.typography.headlineLarge,
-                        fontFamily = myFont
+                        fontFamily = myFont,
+                        lineHeight = 30.sp
                     )
                     IconButton(onClick = {
                         viewModel.logout()
@@ -123,9 +145,20 @@ fun MainScreen(
                     }
                 }
 
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Text(
+                    text = "Hello ${appUser?.name}",
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontFamily = myFont,
+                    fontSize = 25.sp
+                )
+
+                Spacer(modifier = Modifier.height(50.dp))
+
                 Row(
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(top = 50.dp),
+                    modifier = Modifier
+                        .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -147,29 +180,45 @@ fun MainScreen(
                     is MainUiState.Loading -> CircularProgressIndicator()
                     is MainUiState.Empty ->
                         Box(
-                            Modifier.fillMaxWidth()
+                            Modifier
+                                .fillMaxWidth()
                                 .align(Alignment.CenterHorizontally)
                         ) {
-                            Spacer(modifier = Modifier.height(150.dp))
+                            Spacer(modifier = Modifier.height(250.dp))
 
                             Text(
                                 text = "No notes yet\nTap the '+' to add new Note",
+                                fontSize = 20.sp,
                                 fontFamily = myFont,
+                                textAlign = TextAlign.Center,
+                                lineHeight = 30.sp,
                                 modifier = Modifier.align(Alignment.Center)
                             )
                         }
 
                     is MainUiState.Success -> {
                         when (displayMode) {
-                            DisplayMode.LIST -> NotesList(notes = notes, onNoteClick = { noteId ->
-                                navController.navigate("note_screen/$noteId")
-                            }, onDeleteNote = { note ->
-                                viewModel.deleteNote(note)
-                            })
+                            DisplayMode.LIST ->
+                                if (notes.isNotEmpty()) {
+                                    NotesList(
+                                        notes = notes,
+                                        onNoteClick = { noteId ->
+                                            navController.navigate("note_screen/$noteId")
+                                        }, onDeleteNote = { note ->
+                                            viewModel.deleteNote(note)
+                                        })
+                                }
 
-                            DisplayMode.MAP -> NotesMap(notes = notes, onNoteClick = { noteId ->
-                                navController.navigate("note_screen/$noteId")
-                            })
+                            DisplayMode.MAP -> {
+                                Spacer(modifier = Modifier.height(50.dp))
+
+                                NotesMap(
+                                    notes = notes,
+                                    onNoteClick = { noteId ->
+                                        navController.navigate("note_screen/$noteId")
+
+                                    })
+                            }
                         }
                     }
 

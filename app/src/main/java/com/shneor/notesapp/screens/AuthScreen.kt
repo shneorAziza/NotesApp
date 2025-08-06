@@ -28,6 +28,8 @@ fun AuthScreen(
 
     var password by remember { mutableStateOf("") }
 
+    var name by remember { mutableStateOf("") }
+
     var passwordConfirm by remember { mutableStateOf("") }
 
     val uiState by viewModel.uiState.collectAsState()
@@ -52,20 +54,30 @@ fun AuthScreen(
         ) {
             Text(
                 text = if (authMode == AuthMode.LOGIN) "Login" else "Sign Up",
-                style = MaterialTheme.typography.headlineLarge
+                style = MaterialTheme.typography.headlineLarge,
+                fontFamily = myFont
             )
             Spacer(Modifier.height(16.dp))
 
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("Email") }
+                label = {
+                    Text(
+                    text = "Email",
+                    fontFamily = myFont
+                ) }
             )
             Spacer(Modifier.height(8.dp))
+
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("Password") },
+                label = {
+                    Text(
+                        text = "Password",
+                        fontFamily = myFont
+                    ) },
                 visualTransformation = PasswordVisualTransformation()
             )
             Spacer(Modifier.height(8.dp))
@@ -74,9 +86,27 @@ fun AuthScreen(
                 OutlinedTextField(
                     value = passwordConfirm,
                     onValueChange = { passwordConfirm = it },
-                    label = { Text("Confirm Password") },
+                    label = {
+                        Text(
+                            text = "Confirm Password",
+                            fontFamily = myFont
+                        ) },
                     visualTransformation = PasswordVisualTransformation()
                 )
+
+                Spacer(Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = {
+                        Text(
+                            text = "Name",
+                            fontFamily = myFont
+                        ) },
+                    visualTransformation = PasswordVisualTransformation()
+                )
+
                 Spacer(Modifier.height(16.dp))
             }
 
@@ -86,7 +116,7 @@ fun AuthScreen(
                         viewModel.login(email, password)
                     } else {
                         if (password == passwordConfirm) {
-                            viewModel.signup(email, password)
+                            viewModel.signup(email, password, name)
                         } else {
                             viewModel.setErrorMessage("Passwords do not match")
                         }
@@ -94,7 +124,10 @@ fun AuthScreen(
                 },
                 enabled = uiState !is AuthUiState.Loading
             ) {
-                Text(if (authMode == AuthMode.LOGIN) "Login" else "Sign Up")
+                Text(
+                    if (authMode == AuthMode.LOGIN) "Login" else "Sign Up",
+                    fontFamily = myFont
+                )
             }
 
             if (uiState is AuthUiState.Loading) {
@@ -102,14 +135,21 @@ fun AuthScreen(
             }
             if (uiState is AuthUiState.Error) {
                 val errorMessage = (uiState as AuthUiState.Error).message
-                Text(text = errorMessage, color = MaterialTheme.colorScheme.error)
+                Text(
+                    text = errorMessage,
+                    color = MaterialTheme.colorScheme.error,
+                    fontFamily = myFont
+                )
             }
 
             TextButton(onClick = {
                 authMode = if (authMode == AuthMode.LOGIN) AuthMode.SIGNUP else AuthMode.LOGIN
                 viewModel.resetUiState()
             }) {
-                Text(if (authMode == AuthMode.LOGIN) "Don't have an account? Sign up" else "Already have an account? Login")
+                Text(
+                    if (authMode == AuthMode.LOGIN) "Don't have an account? Sign up" else "Already have an account? Login",
+                    fontFamily = myFont
+                )
             }
         }
     }

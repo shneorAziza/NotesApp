@@ -29,6 +29,12 @@ fun NoteScreen(
 ) {
     val viewModel: NoteViewModel = hiltViewModel()
 
+    val formattedDate by viewModel.formattedDate.collectAsState()
+
+    val noteLatitude by viewModel.noteLatitude.collectAsState()
+
+    val noteLongitude by viewModel.noteLongitude.collectAsState()
+
     val title by viewModel.noteTitle.collectAsState()
 
     val content by viewModel.noteContent.collectAsState()
@@ -85,6 +91,25 @@ fun NoteScreen(
                     .padding(16.dp)
                     .fillMaxSize()
             ) {
+
+                if (noteId != null) {
+                    Text(
+                        text = "Created at: $formattedDate",
+                        style = MaterialTheme.typography.bodySmall,
+                        fontFamily = myFont
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = "Location: (%.4f, %.4f)".format(noteLatitude, noteLongitude),
+                        style = MaterialTheme.typography.bodySmall,
+                        fontFamily = myFont
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
                 OutlinedTextField(
                     value = title,
                     onValueChange = { viewModel.onTitleChange(it) },
@@ -97,6 +122,7 @@ fun NoteScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(16.dp))
+
                 OutlinedTextField(
                     value = content,
                     onValueChange = { viewModel.onContentChange(it) },
