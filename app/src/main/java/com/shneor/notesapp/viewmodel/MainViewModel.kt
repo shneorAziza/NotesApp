@@ -51,9 +51,9 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun deleteNote(note: Note) {
+    fun deleteNote(noteId: String) {
         viewModelScope.launch {
-            notesRepository.deleteNote(note)
+            notesRepository.deleteNoteById(noteId)
         }
     }
 

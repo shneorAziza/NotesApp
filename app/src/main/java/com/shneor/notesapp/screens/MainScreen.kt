@@ -44,11 +44,10 @@ val myFont = FontFamily(
 @SuppressLint("MissingPermission")
 @Composable
 fun MainScreen(
-    navController: NavController
+    navController: NavController,
+    viewModel: MainViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
-
-    val viewModel: MainViewModel = hiltViewModel()
 
     val authViewModel: AuthViewModel = hiltViewModel()
 
@@ -205,7 +204,7 @@ fun MainScreen(
                                         onNoteClick = { noteId ->
                                             navController.navigate("note_screen/$noteId")
                                         }, onDeleteNote = { note ->
-                                            viewModel.deleteNote(note)
+                                            viewModel.deleteNote(note.id)
                                         })
                                 }
 

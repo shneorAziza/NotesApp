@@ -86,16 +86,11 @@ class NoteViewModel @Inject constructor(
                     id = currentNoteId!!,
                     title = title,
                     content = content,
-                    latitude = latitude,
-                    longitude = longitude,
+                    latitude = noteLatitude.value,
+                    longitude = noteLongitude.value,
                     timestamp = noteTimestamp.value
                 )
                 notesRepository.updateNote(updatedNote)
-
-                _noteTitle.value = title
-                _noteContent.value = content
-                _noteLatitude.value = latitude
-                _noteLongitude.value = longitude
             }
         }
     }

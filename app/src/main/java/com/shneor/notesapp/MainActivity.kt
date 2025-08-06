@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.shneor.notesapp.repository.AuthRepository
@@ -19,12 +20,13 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.google.firebase.firestore.FirebaseFirestore
 import com.shneor.notesapp.screens.AuthScreen
 import com.shneor.notesapp.screens.MainScreen
 import com.shneor.notesapp.screens.NoteScreen
 import com.shneor.notesapp.viewmodel.AuthViewModel
+import com.shneor.notesapp.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import com.google.firebase.firestore.FirebaseFirestore
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -47,9 +49,15 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Navigation() {
+
     val navController = rememberNavController()
+
+    val mainViewModel: MainViewModel = hiltViewModel()
+
     val auth = FirebaseAuth.getInstance()
+
     val firestore = FirebaseFirestore.getInstance()
+
     val authRepository = AuthRepository(auth, firestore)
 
     val startDestination = if (authRepository.getCurrentUser() != null) "main" else "auth"
@@ -62,16 +70,16 @@ fun Navigation() {
             AuthScreen(navController = navController, viewModel = AuthViewModel(authRepository))
         }
         composable("main") {
-            MainScreen(navController = navController)
+            MainScreen(navController = navController, viewModel = mainViewModel)
         }
         composable(
             route = "note_screen/{noteId}?latitude={latitude}&longitude={longitude}",
             arguments = listOf(
                 navArgument("noteId") {
-                type = NavType.StringType
-                nullable = true
-                defaultValue = null
-            },
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                },
                 navArgument("latitude") {
                     type = NavType.FloatType
                     defaultValue = 0f
@@ -89,7 +97,10 @@ fun Navigation() {
                 navController = navController,
                 noteId = noteId,
                 initialLatitude = latitude,
-                initialLongitude = longitude
+                initialLongitude = longitude,
+                onDeleteNote = { id ->
+                    mainViewModel.deleteNote(id)
+                }
             )
         }
     }
