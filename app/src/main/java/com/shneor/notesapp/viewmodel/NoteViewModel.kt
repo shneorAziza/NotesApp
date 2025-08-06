@@ -66,8 +66,8 @@ class NoteViewModel @Inject constructor(
     fun saveNote(title: String, content: String, latitude: Double, longitude: Double) {
         viewModelScope.launch {
             if (currentNoteId == null) {
-                // New note
-                val newNote = Note(
+
+                 val newNote = Note(
                     title = title,
                     content = content,
                     latitude = latitude,
@@ -81,7 +81,7 @@ class NoteViewModel @Inject constructor(
                 _noteLongitude.value = longitude
                 _noteTimestamp.value = newNote.timestamp
             } else {
-                // Update existing note
+
                 val updatedNote = Note(
                     id = currentNoteId!!,
                     title = title,

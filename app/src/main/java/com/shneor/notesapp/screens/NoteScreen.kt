@@ -75,10 +75,6 @@ fun NoteScreen(
                                     latitude = initialLatitude,
                                     longitude = initialLongitude
                                 )
-                                Log.d(
-                                    "New note",
-                                    "$title, $content, $initialLatitude, $initialLongitude"
-                                )
                                 navController.popBackStack()
                             }) {
                             Icon(Icons.Default.Done, contentDescription = "Save")

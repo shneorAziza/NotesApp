@@ -1,6 +1,5 @@
 package com.shneor.notesapp.viewmodel
 
-
 import android.annotation.SuppressLint
 import android.content.Context
 import android.location.LocationManager
@@ -21,7 +20,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import javax.inject.Inject
-
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
