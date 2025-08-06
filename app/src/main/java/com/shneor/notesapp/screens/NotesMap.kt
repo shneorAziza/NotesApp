@@ -27,6 +27,7 @@ fun NotesMap(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
+
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
             properties = properties,
@@ -34,7 +35,10 @@ fun NotesMap(
         ) {
             notes.forEach { note ->
                 Marker(
-                    state = rememberMarkerState(position = LatLng(note.latitude, note.longitude)),
+                    state = rememberMarkerState(
+                        position = LatLng(note.latitude, note.longitude),
+                        key = note.id ?: ""
+                    ),
                     title = note.title,
                     snippet = note.content,
                     onClick = {
