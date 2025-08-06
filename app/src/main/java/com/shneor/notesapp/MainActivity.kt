@@ -64,16 +64,31 @@ fun Navigation() {
             MainScreen(navController = navController)
         }
         composable(
-            route = "note_screen/{noteId}",
-            arguments = listOf(navArgument("noteId") {
+            route = "note_screen/{noteId}?latitude={latitude}&longitude={longitude}",
+            arguments = listOf(
+                navArgument("noteId") {
                 type = NavType.StringType
                 nullable = true
                 defaultValue = null
-            })
+            },
+                navArgument("latitude") {
+                    type = NavType.FloatType
+                    defaultValue = 0f
+                },
+                navArgument("longitude") {
+                    type = NavType.FloatType
+                    defaultValue = 0f
+                }
+            )
         ) { backStackEntry ->
+            val noteId = backStackEntry.arguments?.getString("noteId")
+            val latitude = backStackEntry.arguments?.getFloat("latitude")?.toDouble() ?: 0.0
+            val longitude = backStackEntry.arguments?.getFloat("longitude")?.toDouble() ?: 0.0
             NoteScreen(
                 navController = navController,
-                noteId = backStackEntry.arguments?.getString("noteId")
+                noteId = noteId,
+                initialLatitude = latitude,
+                initialLongitude = longitude
             )
         }
     }

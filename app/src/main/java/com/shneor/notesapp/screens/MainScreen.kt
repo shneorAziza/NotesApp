@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.model.LatLng
 import com.shneor.notesapp.R
 import com.shneor.notesapp.ui.theme.CustomBackGround
 
@@ -39,7 +40,6 @@ val myFont = FontFamily(
 fun MainScreen(
     navController: NavController
 ) {
-
     val context = LocalContext.current
 
     val viewModel: MainViewModel = hiltViewModel()
@@ -49,6 +49,8 @@ fun MainScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     val notes by viewModel.notes.collectAsState()
+
+    val currentLocation by remember { mutableStateOf<LatLng?>(null) }
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -83,7 +85,11 @@ fun MainScreen(
     ) {
         Scaffold(
             floatingActionButton = {
-                FloatingActionButton(onClick = { navController.navigate("note_screen/null") }) {
+                FloatingActionButton(onClick = {
+                    val lat = currentLocation?.latitude ?: 0.0
+                    val lng = currentLocation?.longitude ?: 0.0
+                    navController.navigate("note_screen/null?latitude=$lat&longitude=$lng")
+                }) {
                     Icon(Icons.Default.Add, contentDescription = "Add Note")
                 }
             }
@@ -97,7 +103,8 @@ fun MainScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(16.dp)
+                        .padding(top = 50.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.Top
                 ) {
@@ -117,7 +124,8 @@ fun MainScreen(
                 }
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(top = 50.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -142,11 +150,12 @@ fun MainScreen(
                             Modifier.fillMaxWidth()
                                 .align(Alignment.CenterHorizontally)
                         ) {
-                            Spacer(modifier = Modifier.height(50.dp))
+                            Spacer(modifier = Modifier.height(150.dp))
 
                             Text(
-                                text = "No notes yet. Tap the '+' to add new Note",
-                                fontFamily = myFont
+                                text = "No notes yet\nTap the '+' to add new Note",
+                                fontFamily = myFont,
+                                modifier = Modifier.align(Alignment.Center)
                             )
                         }
 
