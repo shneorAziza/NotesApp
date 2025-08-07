@@ -1,7 +1,9 @@
 package com.shneor.notesapp.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import com.shneor.notesapp.model.Note
 import com.shneor.notesapp.repository.NotesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -39,6 +41,12 @@ class NoteViewModel @Inject constructor(
 
     private var currentNoteId: String? = null
 
+    private var currentUserId: String? = null
+
+    init {
+        currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+    }
+
     val formattedDate: StateFlow<String> = _noteTimestamp
         .map { timestamp ->
             if (timestamp > 0L) {
@@ -71,7 +79,8 @@ class NoteViewModel @Inject constructor(
                     title = title,
                     content = content,
                     latitude = latitude,
-                    longitude = longitude
+                    longitude = longitude,
+                     userId = currentUserId ?: ""
                 )
                 notesRepository.insertNote(newNote)
 
@@ -80,6 +89,7 @@ class NoteViewModel @Inject constructor(
                 _noteLatitude.value = latitude
                 _noteLongitude.value = longitude
                 _noteTimestamp.value = newNote.timestamp
+
             } else {
 
                 val updatedNote = Note(
@@ -88,7 +98,8 @@ class NoteViewModel @Inject constructor(
                     content = content,
                     latitude = noteLatitude.value,
                     longitude = noteLongitude.value,
-                    timestamp = noteTimestamp.value
+                    timestamp = noteTimestamp.value,
+                    userId = currentUserId ?: ""
                 )
                 notesRepository.updateNote(updatedNote)
             }

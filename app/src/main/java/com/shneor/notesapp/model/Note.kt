@@ -13,5 +13,5 @@ data class Note(
     val latitude: Double,
     val longitude: Double,
     val timestamp: Long = System.currentTimeMillis(),
-    val imageUrl: String? = null
+    val userId: String
 )

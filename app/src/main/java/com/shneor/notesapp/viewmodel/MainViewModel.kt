@@ -3,11 +3,13 @@ package com.shneor.notesapp.viewmodel
 import android.annotation.SuppressLint
 import android.content.Context
 import android.location.LocationManager
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.google.android.gms.location.LocationServices
+import com.google.firebase.auth.FirebaseAuth
 import com.shneor.notesapp.model.Note
 import com.shneor.notesapp.repository.AuthRepository
 import com.shneor.notesapp.repository.NotesRepository
@@ -37,14 +39,20 @@ class MainViewModel @Inject constructor(
     val locationEvent: SharedFlow<LocationEvent> = _locationEvent.asSharedFlow()
 
     init {
-        fetchNotes()
+        observeLogin()
     }
 
-    private fun fetchNotes() {
+    private fun fetchNotes(userId: String) {
+
         viewModelScope.launch {
-            notesRepository.getAllNotes().collect { notesList ->
+            notesRepository.getAllNotes(userId).collect { notesList ->
+
                 _notes.value = notesList
-                _uiState.value = if (notesList.isEmpty()) MainUiState.Empty else MainUiState.Success
+                _uiState.value = if (notesList.isEmpty()) {
+                    MainUiState.Empty
+                } else {
+                    MainUiState.Success
+                }
             }
         }
     }
@@ -101,6 +109,19 @@ class MainViewModel @Inject constructor(
             _locationEvent.emit(LocationEvent.LocationPermissionDenied)
         }
     }
+
+    private fun observeLogin() {
+        FirebaseAuth.getInstance().addAuthStateListener { auth ->
+            val user = auth.currentUser
+            if (user != null) {
+                Log.d("MainViewModel", "User id: ${user.uid}")
+                fetchNotes(user.uid)
+            } else {
+                Log.e("MainViewModel", "No user logged in")
+            }
+        }
+    }
+
 }
 
 sealed class MainUiState {
